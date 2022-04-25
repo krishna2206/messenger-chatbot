@@ -1,0 +1,9 @@
+fastapi == 0.75.1
+messenger_api_python == 2022.4.22
+pymongo == 4.0.2
+python_dotenv == 0.20.0
+tinydb == 4.7.0
+tinydb_encrypted_jsonstorage == 0.1.2
+uvicorn == 0.17.6
+dnspython  == 2.2.0
+importlib==1.0.4
