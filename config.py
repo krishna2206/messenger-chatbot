@@ -21,7 +21,7 @@ DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_PORT = int(os.getenv("DB_PORT"))
+DB_PORT = None if os.getenv("DB_PORT") is None else int(os.getenv("DB_PORT"))
 DB_CONNECTION_STRING = os.getenv("DB_CONNECTION_STRING")
 
 # Application configuration
@@ -31,7 +31,7 @@ WEB_CONCURRENCY = os.getenv("WEB_CONCURRENCY")
 
 # Local app configuration
 APP_HOST = os.getenv("APP_HOST")
-APP_PORT = int(os.getenv("APP_PORT"))
+APP_PORT = None if os.getenv("APP_PORT") is None else int(os.getenv("APP_PORT"))
 
 # URLs
 FILES_URL = f"{APP_URL}/files"
