@@ -12,7 +12,7 @@ class Bot:
     def __init__(self):
         # Initial configuration
         self.INTENTS = fetcher.fetch_intents(fetcher.fetch_intents_modules(config.PACKAGES))
-        Model(config)
+        self.MODEL = Model(config)
 
         # print(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]"), "Bot", id(self), "is ready")
 
@@ -20,28 +20,26 @@ class Bot:
     @print_received_message
     def receive_message(self, message):
         user_id = message.get_sender_id()
-        model = Model(config)
         SEND_API.mark_seen_message(user_id)
 
-        user = model.get_user(user_id)
+        user = self.MODEL.get_user(user_id)
         if user is None:
             print(f"Adding user {user_id} in the database")
-            model.add_user(user_id)
+            self.MODEL.add_user(user_id)
         else:
-            model.update_user(user_id)
+            self.MODEL.update_user(user_id)
 
         self.respond_message(message)
 
     @threaded
     def respond_message(self, message):
-        model = Model(config)
         user_id = message.get_sender_id()
         message_type = message.get_type()
 
         if message_type in ("postback", "quick_reply"):
-            query = model.get_query(user_id)
+            query = self.MODEL.get_query(user_id)
             if query is not None:
-                model.remove_query(user_id)
+                self.MODEL.remove_query(user_id)
 
             payload = json.loads(message.get_payload())
             target_action = payload.get("target_action")
@@ -51,7 +49,7 @@ class Bot:
             self.respond_from_user_intent(user_intent, **action_params, recipient_id=user_id)  # avec params
 
         elif message_type in ("text", "attachments"):
-            query = model.get_query(user_id)
+            query = self.MODEL.get_query(user_id)
 
             if query is None:
                 user_intent, extracted_data = recognizer.extract_user_intent(self.INTENTS, message)
@@ -61,6 +59,7 @@ class Bot:
                     self.respond_from_user_intent(user_intent, **extracted_data, recipient_id=user_id)
             else:
                 user_intent = recognizer.search_for_intent(self.INTENTS, query.get("action"))
+                query_params = query.get("params")
 
                 if user_intent is not None:
                     param = None
@@ -68,9 +67,10 @@ class Bot:
                         param = message.get_text_content()
                     elif message_type == "attachments":
                         param = message.get_attachments()[0].get("payload").get("url")
-                    self.respond_from_user_intent(user_intent, param)
-                    model.remove_query(user_id)
+                    self.respond_from_user_intent(user_intent, param, **query_params, recipient_id=user_id)
+                    self.MODEL.remove_query(user_id)
                 else:
+                    self.MODEL.remove_query(user_id)
                     raise exceptions.UnableToRespondError(
                         "Failed to extract user's intent.\n" +
                         f"There is no intent that matches the action '{query.get('action')}', " +
