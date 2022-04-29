@@ -59,7 +59,7 @@ class Bot:
                     self.respond_from_user_intent(user_intent, **extracted_data, recipient_id=user_id)
             else:
                 user_intent = recognizer.search_for_intent(self.INTENTS, query.get("action"))
-                query_params = query.get("params")
+                query_params = {} if query.get("params") is None else query.get("params")
 
                 if user_intent is not None:
                     param = None
