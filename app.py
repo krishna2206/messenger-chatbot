@@ -73,6 +73,3 @@ async def handle_post_request(request: Request):
             return Response(status_code=200)
     return Response(status_code=400)
 
-
-if __name__ == "__main__":
-    uvicorn.run("app:webserver", host=APP_HOST, port=APP_PORT)
