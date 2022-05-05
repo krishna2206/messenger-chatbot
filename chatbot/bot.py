@@ -53,6 +53,7 @@ class Bot:
 
             if query is None:
                 user_intent, extracted_data = recognizer.extract_user_intent(self.INTENTS, message)
+                extracted_data = {} if extracted_data is None else extracted_data
                 if user_intent.get("type") == "fallback":
                     self.respond_from_user_intent(user_intent, recipient_id=user_id)
                 else:
@@ -67,8 +68,8 @@ class Bot:
                         param = message.get_text_content()
                     elif message_type == "attachments":
                         param = message.get_attachments()[0].get("payload").get("url")
-                    self.respond_from_user_intent(user_intent, param, **query_params, recipient_id=user_id)
                     self.MODEL.remove_query(user_id)
+                    self.respond_from_user_intent(user_intent, param, **query_params, recipient_id=user_id)
                 else:
                     self.MODEL.remove_query(user_id)
                     raise exceptions.UnableToRespondError(
